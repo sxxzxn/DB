@@ -1,4 +1,4 @@
-#job_code에 따른 직업 구분
+employees#job_code에 따른 직업 구분
 case when
 decode_coacle
 
