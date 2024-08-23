@@ -131,7 +131,7 @@ SELECT * from information_schema.VIEWS;
 		
 		
 		
-	3. COLUMN 속성 값 변경
+	3. COLUMN 속성 값 변경, 추가 
 		ALTER TABLE 대상 테이블명
 		MODIFFY COLUMN IF NOT EXISTS 대상 컬럼이름
 		
@@ -261,7 +261,7 @@ WHERE key_name LIKE '%pr%';
 
 
 	2. 제약 사항 삭제
-		ALTER 테이블명
+		ALTER TABLE 테이블명
 		DROP CONSTRAINT `CHECK 제약사항이름`
 	
 */
@@ -316,7 +316,7 @@ DELETE FROM vw_member WHERE userID = 'user14';
 		ALTER TABLE 테이블명
 		ADD CONSTRATNT FOREIGN KEY `외래키이름`(현재 테이블에 있는 컬럼1,2,,,)
 		REFERENCES 참조 테이블명 (참조 테이블에 있는 컬럼명1,,2,,,)
-		ON DELECTE CASCADE | RESTRICT | SET NULL | NO ACTION | SET DEFAULT
+		ON DELECTE (CASCADE | RESTRICT | SET NULL | NO ACTION | SET DEFAULT)
 		
 		
 		delete RESTRICT  update NO ACTION 으로 해야 추적이 가능하다
@@ -354,6 +354,8 @@ WHERE TABLE_NAME IN (tbl_order_detail_info)
 	)
 	
 	select * form 임시테이블명;
+	하나의 프로세스에서 시작하고 조회까지 종료, 메모리상에만 종료
+	쿼리가 끝나면 사라진다
 */
 
 # 임시 테이블 (TEMPORARY TABLE)
