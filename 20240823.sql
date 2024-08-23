@@ -771,29 +771,188 @@ BEGIN NOT ATOMIC
 	
 	#1. 커서 선언
 	DECLARE mem_cur CURSOR FOR 
-		SELECT user_id, user_name
-		FROM tbl_member
-		ORDER BY user_id;
+		SELECT user_id, user_name FROM tbl_member ORDER BY user_id;
 		
 	#2. 핸들러 등록 (작업량이 많으면 이렇게 BEGIN ~ END로 묶어준다)
 	DECLARE CONTINUE handler FOR NOT FOUND SET JOB_FLAG = true;
 		
 	#3. OPEN 커서이름
-	OPEN mem_cur
+	OPEN mem_cur;
 	
 	#4. FRTCH, 반복처리
 	loop1:loop 
 		fetch mem_cur INTO pUSER_ID, pUSER_NAME;
 		
 		#비즈니스 로직
-		SELECT pUSER_ID, pUSER_NAME;
-		
 		if JOB_FLAG then
 		leave loop1;
 		END if;
-		
+		SELECT pUSER_ID, pUSER_NAME;
 	END loop loop1;
 	
 	#5. CLOSE커서이름, 커서 닫기
-	CLOSE mem_cur
+	CLOSE mem_cur;
 END;
+
+#저장 프로시저
+/*
+
+
+	-기본형식
+	DELIMITER $$
+	CREATE PROCEDURE 프로시저 이름( IN / OUT 매개변수,,,)
+	BEGIN 
+		실행구문1;
+		조건;
+		루프;
+		,,,,
+	END $$
+	DELIMITER;
+	
+	-호출 : CALL프로시저 이름(IN / OUT 매개변수,,,)
+
+*/
+DELIMITER $$
+CREATE OR REPLACE PROCEDURE USP_test(IN id VARCHAR(20))
+BEGIN 
+	SELECT user_id, user_name FROM tbl_member WHERE user_id = id;
+END $$
+DELIMITER;
+
+SET @uID = 'user1';
+CALL USP_test(@uID);
+
+DELIMITER $$
+CREATE OR REPLACE PROCEDURE USP_test2(in id VARCHAR(20), OUT nm VARCHAR(20))
+BEGIN 
+	SELECT user_name INTO nm FROM tbl_member WHERE user_id = id;
+END $$
+DELIMITER;
+
+SET @uID = 'user1';
+SET @uNM = '';
+CALL USP_test2(@uID,@uNM);
+SELECT @uNM AS 'USER_NAME';
+
+#프로시저에 들어가는 루틴..? 정보
+SELECT *
+FROM information_schema.ROUTINES
+WHERE routine_schema = 'books'
+AND routine_type = 'PROCEDURE'
+;
+
+#프로시저에 들어가는 파라미터 정보
+SELECT *
+FROM information_schema.PARAMETERS
+WHERE specific_schema = 'books'
+AND specific_type = 'PROCEDURE'
+;
+
+# 시스템에 설정되어있는 모든 정보
+# where 조건절 설정시 큰걸앞에 작은거 뒤에.. 
+# 만약 타입이 프로시저인걸 먼저보면 시간이더 오래걸림 
+# 모수를 줄여준다!
+SELECT *
+FROM mysql.proc
+WHERE db ='books' and `TYPE` = 'PROCEDURE'
+
+#회원가입할떄 프로시저 사용
+
+DELIMITER $$
+CREATE OR REPLACE PROCEDURE USP_MEMBER_REGIST(
+     in pUserId VARCHAR(20)
+	, in pUserName VARCHAR(20)
+	, in pPwd VARCHAR(20)
+	, out oResult VARCHAR(100)
+)
+BEGIN 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+	BEGIN 
+	GET DIAGNOSTICS
+		ROLLBACK;
+		SET oResult = -1;
+	END;
+	
+	START TRANSACTION;
+	INSERT INTO tbl_member(user_id, user_name, pwd)
+	VALUES (pUserId, pUserName, pPwd)
+	
+	SET oResult = LAST_INSERT_ID();
+	
+	COMMIT;	
+END $$
+DELIMITER;
+
+SET @pID = 'user1';
+SET @pNAME = '홍길동';
+SET @pPWD = '1234';
+SET @oRESULT = '';
+
+CALL USP_MEMBER_REGIST(@pID, @pNAME, @pPWD, @oRESULT);
+
+SELECT @oResult;
+/*
+
+프로시저 장점
+한번 컴파일하면 속도가 빠름
+*/
+
+# 트리거 p425
+# 트리거가 있으면 데이터베이스 백업이 안된다
+# 백업하려면 트리거 지우고 백업하고 복구하고 다시 반영=> 쓰지마라
+
+/*
+
+	- 데이터 베이스에서 특정 이벤트가 발생했을 떄 특정 동작하도록 하는 프로그램하는것
+	- 트리거 내에서는 전역변수 사용 불가, 지역 변수만 사용 가능
+	- 트리거는 결과셋을 반환하지 않음
+	- 외래키 추가 삭제등 작업에 의해 활성화되지 않음
+	
+	-기본형식
+		CREATE [OR REPLACE] TRIGGER 
+				트리거 이름 트리거의 동작 시간 트리거가 동작할 이벤트
+			on 테이블 이름 for EACH ROW
+		트리거에서 실행할 구문;
+		
+	-트리거의 동작 시간 옶션 값
+	 1. AFTER TRIGGER : INSERT, UPDATE, DELETE 문이 실행된 후에 동작하는 트리거
+	 2. BEFORE TRIGGER : INSERT, UPDATE, DELETE 문이 실행되기 전에 동작하는 트리거
+	
+
+*/
+DROP TABLE if EXISTS `TMP_member`;
+CREATE TEMPORARY TABLE `TMP_member` (
+	user_id VARCHAR(10) NULL,
+	user_name VARCHAR(10) NULL,
+	pwd VARCHAR(10) NULL
+)
+COLLATE = 'utf8mb4_general_ci'
+ENGINE=INNODB:
+
+
+DROP TABLE if EXISTS `TMP_TG_TEST`;
+CREATE TEMPORARY TABLE `TMP_TG_TEST` (
+	contents TEXT NULL,
+	event_type VARCHAR(10) NULL,
+	reg_date DATETIME NULL DEFAULT NOW()
+)
+COLLATE = 'utf8mb4_general_ci'
+ENGINE=INNODB:
+
+
+)
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER 
+	`TG_MEMBER_TEMP_INSERT` AFTER INSERT ON TMP_memvber FOR EACH row
+BEGIN
+	DECLARE pContent TEXT;
+	SET pContent = CONCAT(NEW.user_id, NEW.user_name, NEW.pwd);
+	INSERT INTO TMp_TG_TEXT (contents, event_type)
+	VALUES (pContent, 'INSERT')
+END $$
+
+DELIMITER;
+
+INSERT INTO  tbl_member2(user_id, user_name, pwd) values ('user100', '홍길동', '1234');
+SELECT * FROM TMP_TG_TEST;
