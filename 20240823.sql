@@ -927,7 +927,7 @@ CREATE TEMPORARY TABLE `TMP_member` (
 	pwd VARCHAR(10) NULL
 )
 COLLATE = 'utf8mb4_general_ci'
-ENGINE=INNODB:
+ENGINE=INNODB;
 
 
 DROP TABLE if EXISTS `TMP_TG_TEST`;
@@ -937,22 +937,83 @@ CREATE TEMPORARY TABLE `TMP_TG_TEST` (
 	reg_date DATETIME NULL DEFAULT NOW()
 )
 COLLATE = 'utf8mb4_general_ci'
-ENGINE=INNODB:
+ENGINE=INNODB;
 
 
-)
+
 
 DELIMITER $$
-CREATE OR REPLACE TRIGGER 
-	`TG_MEMBER_TEMP_INSERT` AFTER INSERT ON TMP_memvber FOR EACH row
+CREATE OR REPLACE TRIGGER `TG_MEMBER_TEMP_INSERT` 
+AFTER INSERT ON tbl_member2 FOR EACH row
 BEGIN
 	DECLARE pContent TEXT;
 	SET pContent = CONCAT(NEW.user_id, NEW.user_name, NEW.pwd);
-	INSERT INTO TMp_TG_TEXT (contents, event_type)
-	VALUES (pContent, 'INSERT')
+	INSERT INTO TMp_TG_TEST (contents, event_type)
+	VALUES (pContent, 'INSERT');
 END $$
 
-DELIMITER;
+DELIMITER ;
 
 INSERT INTO  tbl_member2(user_id, user_name, pwd) values ('user100', '홍길동', '1234');
 SELECT * FROM TMP_TG_TEST;
+SELECT * FROM tbl_member2;
+DELETE FROM tbl_member2 WHERE user_id = 'USER100';
+#
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER `TG_MEMBER_TEMP_INSERT_2` 
+	BEFORE INSERT ON tbl_member2 FOR EACH ROW 
+BEGIN
+	DECLARE content TEXT;
+#	DECLARE MSG VARCHAR(100) DEFAULT '';
+	if NEW.user_name IS null then
+		SIGNAL SQLSTATE '90000'
+		SET MESSAGE_TEXT = '이름이 null 입니다.';
+	else
+		SET content = CONCAT(NEW.user_id, NEW.user_name);
+		INSERT INTO TMP_TG_TEST(contents, event_type, reg_date)
+		VALUES ( content, 'INSERT_2',NOW());
+	END if;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+BEGIN NOT ATOMIC
+	DECLARE exit HANDLER For SQLEXCEPTION
+	begin
+		GET DIAGNOSTICS CONDITION 1 @sql_state = RETURNED_SQLSTATE,
+												@err_no = MYSQl_ERRNO,
+												@err_text = MESSAGE_TEXT;
+	#	SELECT @sql_state, @err_no, @err_text;
+		
+		SET @ERR_CODE = JSON_OBJECT('ERR_CODE' , 500,
+										'ERR_MSG' , @err_text,
+										'ERROR_MSG' , CONCAT(@sql_state,':' , @err_no, ':', @err_text));
+		SELECT @ERR_CODE;
+		END ;
+		INSERT into tbl_member2 (user_id, user_name, pwd)
+		VALUES ('user101', 'ABCD', '1234');
+	END $$	
+DELIMITER ;
+
+SELECT * FROM TMP_TG_TEST;
+
+SELECT * FROM tbl_member2;
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER `TG_MEMBER_TEMP_INSERT_3` 
+ AFTER insert ON tbl_member2 FOR EACH row
+ begin
+	DECLARE content TEXT;
+	if new.user_name = 'ABCD' then
+		SIGNAL SQLSTATE '91000'
+		SET MESSAGE_TEXT = 'ABCD';
+		
+		DELETE FROM tbl_member2 WHERE user_name = 'ABCD'; 
+	ELSE 
+		SET content = CONCAT(new.user_id, new.user_name);
+		INSERT INTO TMP_TG_TEST(contents, event_type, reg_date)
+		VALUES (content, 'DELETE',NOW());
+	END if;
+END $$
+DELIMITER ;
