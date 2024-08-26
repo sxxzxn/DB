@@ -117,4 +117,27 @@ SHOW TABLE STATUS LIKE '%member%';
 	 ANALYZE TABLE 테이블명; 
 	 ( 속도에 민감한 데이터 다룰 떄 기본적으로 색인으ㅜㄹ 추가한다)
 */
-CREATE INDEX `idx`( 
+
+
+# 비밀번호 암호화
+/*
+
+	- 개인정보보호법에 명시 : 개인정보는 DB 저장시 반드시 암호화하여 저장
+	- 양방향 암호화 : 암호화된 내용을 되돌릴 수 있다. (복호화 가능)
+		-AES(Advanced Encryption Standard) : 256, 512
+			- 높은 안정성과 빠른 속도 때문에 양방향 암호화에서 가장 많이 사용
+			- 암호화 <--> 복호화 시 동일한 키 사용 --> 대칭키 방식
+			- AES-128, AEX192, / AES256, AES-512 : 숫자는 키의 길이를 의미
+	- 단반향 암호화 : 복호화 불가능
+		-SHA2(Secure Hash Algorithm 2 ) : 256, 512
+			-SHA-224, SHA-256, SHA-384, SHA-512 ( 어떠한 값이 들어가도 유추하면 안됨)
+			- SHA-256 알고리즘 : 미국 국립표준기술연구소 NITS에서 발표한 해시 알고리즘
+	- 해시 (HASH) : 다양한 길이를 같는 데이터를 고정된 길이의 데이터로 맴핑(MAPING)	
+
+*/
+# 단방향 암호화 : SHA2(비밀번호, 해시길이(비트수))
+UPDATE tbl_member SET pwd = SHA2('1234', 256) WHERE user_id = 'user1';
+SELECT pwd FROM tbl_member WHERE user_id = 'user1';
+
+SET inPwd = SHA2('비밀번호',256)
+if pwd = inPwd then
