@@ -58,10 +58,15 @@ VALUES('user1','홍길동','1234')
 
 SELECT * from tbl_member;
 
+SELECT * from tbl_bbs;
+
 SELECT memberId, `name`, pwd FROM tbl_member;
 SELECT * from tbl_member WHERE memberId='user10' AND pwd='1234';
 
-
-
 INSERT INTO tbl_member(memberId, `name`, pwd)
 VALUES('11','홍길동','1234');
+
+INSERT INTO tbl_bbs(title, memberId, content)
+VALUES('테스트확인','user10','내용1');
+
+DELETE FROM tbl_bbs WHERE idx=10;
