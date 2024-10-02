@@ -1,4 +1,4 @@
-tbl_membertbl_memberUSE fullstack7;
+tbl_membertbl_membertbl_memberUSE fullstack7;
 CREATE TABLE tbl_member(
 	`memberId` VARCHAR(20) NOT NULL COMMENT '회원ID' COLLATE 'utf8mb4_general_ci',
 	`name` VARCHAR(20) NULL DEFAULT NULL COMMENT '회원이름' COLLATE 'utf8mb4_general_ci',
@@ -63,10 +63,68 @@ SELECT * from tbl_bbs;
 SELECT memberId, `name`, pwd FROM tbl_member;
 SELECT * from tbl_member WHERE memberId='user10' AND pwd='1234';
 
-INSERT INTO tbl_member(memberId, `name`, pwd)
-VALUES('11','홍길동','1234');
+INSERT INTO tbl_member(memberId, `name`, pwd, role)
+VALUES('admin','관리자','1234','admin');
 
 INSERT INTO tbl_bbs(title, memberId, content)
 VALUES('테스트확인','user10','내용1');
 
 DELETE FROM tbl_bbs WHERE idx=10;
+
+#게시글 생성 프로시저
+
+
+DELIMITER $$
+DROP PROCEDURE IF exists insert_bbs $$
+CREATE PROCEDURE insert_bbs (IN ADD_COUNT int)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+	 DECLARE TMP_REG_DATE CHAR(10);
+	 DECLARE TMP_MIN_DATE_CNT INT DEFAULT -50;
+	 DECLARE TMP_ADD_USER_CNT INT DEFAULT 1;
+	 DECLARE LAST_IDX INT DEFAULT 0;
+	 
+	 SET TMP_MIN_DATE_CNT = FLOOR(ADD_COUNT/10)*-1;
+	 WHILE i<= ADD_COUNT do
+	 	if MOD(i,10) = 0 then
+	 		SET TMP_MIN_DATE_CNT = TMP_MIN_DATE_CNT+1;
+	 	END if;
+	 	if MOD(i, 50) = 0 then
+	 		SET TMP_ADD_USER_CNT = TMP_ADD_USER_CNT+1;
+	 	END if;
+	 	
+   
+        INSERT INTO tbl_bbs (
+           memberId, title, content, displayDate, regDate) 
+			  VALUES (
+           CONCAT('user', TMP_ADD_USER_CNT),
+			  CONCAT('제목 ', i), 
+			  CONCAT('내용 ', i),
+			  DATE_FORMAT(ADDDATE(NOW(), TMP_MIN_DATE_CNT), '%Y-%m-%d'),
+			  ADDDATE(NOW(),TMP_MIN_DATE_CNT) );
+			  
+        SET i = i + 1;
+    END WHILE;
+
+END$$
+
+DELIMITER ;
+
+
+
+
+
+#게시글 생성 프로시저 호출
+SET FOREIGN_KEY_CHECKS = 0; 
+CALL insert_bbs(10);
+SET FOREIGN_KEY_CHECKS = 1;
+
+SELECT * FROM tbl_bbs 
+LIMIT 1, ;
+DELETE FROM tbl_bbs;
+
+SELECT COUNT(*) FROM tbl_bbs;
+
+select * FROM tbl_member;
+
+SELECT * FROM tbl_bbs WHERE title desc;
