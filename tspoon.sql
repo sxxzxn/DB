@@ -125,4 +125,30 @@ COMMENT ='탈퇴회원테이블'
 COLLATE 'utf8mb4_general_ci'
 ENGINE=INNODB;
 
+# 회원추가 
 
+SELECT * FROM tbl_member WHERE typeCode = ?;
+INSERT INTO tbl_member (
+    memberId, name, pwd, typeCode
+) 
+VALUES
+    ('admin1', '관리선생님 1', '1234', 'T'),
+    ('admin2', '관리선생님 2', '1234', 'T'),
+    ('admin3', '관리선생님 3', '1234', 'T'),
+    ('admin4', '관리선생님 4', '1234', 'T'),
+    ('admin5', '관리선생님 5', '1234', 'T'),
+    ('admin6', '관리선생님 6', '1234', 'T'),
+    ('admin7', '관리선생님 7', '1234', 'T'),
+    ('admin8', '관리선생님 8', '1234', 'T'),
+    ('admin9', '관리선생님 9', '1234', 'T'),
+    ('admin10', '관리선생님 10', '1234', 'T')
+;
+    
+UPDATE tbl_member
+SET pwd = '1234'
+WHERE typeCode = 'T';
+
+COMMIT;
+
+
+s
