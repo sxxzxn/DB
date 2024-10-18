@@ -3,23 +3,23 @@ CREATE DATABASE tspoon;
 
 # 사용하기
 USE tspoon;
-
+tbl_member
 # member테이블 생성
 CREATE TABLE `tbl_member`(
 	`memberId` VARCHAR(20) NOT NULL COMMENT '회원ID' COLLATE 'utf8mb4_general_ci',
 	`name` VARCHAR(20) NULL DEFAULT NULL COMMENT '회원이름' COLLATE 'utf8mb4_general_ci',
 	`pwd` VARCHAR(300) NOT NULL COMMENT '비밀번호'  COLLATE 'utf8mb4_general_ci',
-	`birthday` DATE NOT NULL COMMENT '생년월일(YYYY-MM-DD)'  COLLATE 'utf8mb4_general_ci',
-	`gender` CHAR(1) NOT NULL DEFAULT 'F' COMMENT 'F여 M남' COLLATE 'utf8mb4_general_ci',
-	`phone` VARCHAR(20) NOT NULL COMMENT'핸드폰번호'  COLLATE 'utf8mb4_general_ci',
-	`email` VARCHAR(50) NOT NULL COMMENT'이메일'  COLLATE 'utf8mb4_general_ci',
-	`interstField` VARCHAR(20) NOT NULL COMMENT'관심분야'  COLLATE 'utf8mb4_general_ci',
-	`grade` VARCHAR(50) NOT NULL COMMENT'학년'  COLLATE 'utf8mb4_general_ci',
-	`locationInfoYN` CHAR(1) NOT NULL DEFAULT 'N' COMMENT'위치정보 동의 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
-	`promtionYN` CHAR(1) NOT NULL DEFAULT 'N' COMMENT'프로모션안내수신 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
-	`personalInfoYN` CHAR(1) NOT NULL DEFAULT 'N' COMMENT'제2자 제공동의 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
-	`cjEduYN` CHAR(1) NOT NULL DEFAULT 'N' COMMENT'천재교육이용약관동의 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
-	`typeCode` CHAR(1) NOT NULL DEFAULT 'P' COMMENT '타입코드 P부모 T선생님 S 학생'  COLLATE 'utf8mb4_general_ci',
+	`birthday` DATE  NULL COMMENT '생년월일(YYYY-MM-DD)'  COLLATE 'utf8mb4_general_ci',
+	`gender` CHAR(1)  NULL DEFAULT 'F' COMMENT 'F여 M남' COLLATE 'utf8mb4_general_ci',
+	`phone` VARCHAR(20)  NULL COMMENT'핸드폰번호'  COLLATE 'utf8mb4_general_ci',
+	`email` VARCHAR(50)  NULL COMMENT'이메일'  COLLATE 'utf8mb4_general_ci',
+	`interstField` VARCHAR(20)  NULL COMMENT'관심분야'  COLLATE 'utf8mb4_general_ci',
+	`grade` VARCHAR(50)  NULL COMMENT'학년'  COLLATE 'utf8mb4_general_ci',
+	`locationInfoYN` CHAR(1)  NULL DEFAULT 'N' COMMENT'위치정보 동의 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
+	`promtionYN` CHAR(1)  NULL DEFAULT 'N' COMMENT'프로모션안내수신 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
+	`personalInfoYN` CHAR(1)  NULL DEFAULT 'N' COMMENT'제2자 제공동의 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
+	`cjEduYN` CHAR(1)  NULL DEFAULT 'N' COMMENT'천재교육이용약관동의 Y 동의 N 거부'  COLLATE 'utf8mb4_general_ci',
+	`typeCode` CHAR(1)  NULL DEFAULT 'P' COMMENT '타입코드 P부모 T선생님 S 학생'  COLLATE 'utf8mb4_general_ci',
 	`memberStateYN` CHAR(1) NULL DEFAULT 'Y' COMMENT '회원상태 Y활동 N 탈퇴'  COLLATE 'utf8mb4_general_ci',
 	`regDate` DATETIME NOT NULL DEFAULT NOW() COMMENT '등록일',
 	`leaveDate` DATETIME NULL DEFAULT NULL COMMENT '탈퇴일일',
